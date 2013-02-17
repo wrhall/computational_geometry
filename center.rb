@@ -24,6 +24,26 @@ class Array
     [min, max]
   end
 
+  def find_interval2
+    max = -1.0 / 0
+    min = 1.0 / 0
+    b = []
+    sum = 0 # should check to see if it's faster
+            # to make sum a float initially or convert it in the loop
+    current = 0
+    
+    self.each do |elt|
+      sum += elt
+      current = sum.to_f / self.length # see above comment
+      if current < min
+        min = current
+        end
+      if current > max
+        max = current
+      end
+    end
+  end
+
   def find_best_interval
     size = 1.0 / 0
     best = []
