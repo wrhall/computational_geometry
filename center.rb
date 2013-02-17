@@ -31,10 +31,10 @@ class Array
     sum = 0 # should check to see if it's faster
             # to make sum a float initially or convert it in the loop
     current = 0
-    
-    self.each do |elt|
-      sum += elt
-      current = sum.to_f / self.length # see above comment
+
+    self.each_index do |i|
+      sum += self[i]
+      current = sum.to_f / (i + 1) # see above comment
       if current < min
         min = current
         end
