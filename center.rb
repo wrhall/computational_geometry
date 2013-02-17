@@ -7,7 +7,7 @@ class Array
     self.sum.to_f / self.length
   end
 
-  def find_interval
+  def find_interval_old
     max = -1.0 / 0
     min = 1.0 / 0
     b = []
@@ -24,7 +24,7 @@ class Array
     [min, max]
   end
 
-  def find_interval2
+  def find_interval
     max = -1.0 / 0
     min = 1.0 / 0
     b = []
