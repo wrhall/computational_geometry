@@ -42,6 +42,7 @@ class Array
         max = current
       end
     end
+    [min, max]
   end
 
   def find_best_interval
@@ -59,7 +60,9 @@ class Array
       end
     end
     return best
-  end
-
-    
+  end    
 end
+i = [-1, 2, 3, 5, 9, 13].find_best_interval.first
+print i, "\n"
+print i.find_interval, "\n"
+print i.find_interval2, "\n"
