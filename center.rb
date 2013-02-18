@@ -44,6 +44,44 @@ class Array
     end
     best
   end    
+
+  def find_apx_center
+    m = self.mean
+    closest = self.first
+    self.each do |elt|
+      if (elt - m).abs < (closest - m).abs
+        closest = elt
+      end
+    end
+    closest
+  end
+
+  def find_apx_interval
+    # why it fails: (0.15 off from opt)
+    # 1.9.3-p194 :085 > a.find_apx_interval
+    #   => [3, 6, 2, 10, -14, 20] 
+    # 1.9.3-p194 :086 > a.find_best_interval
+    #   => [[6, 10, 2, 3, 20, -14], [6, 10, 3, 2, 20, -14], [6, 3, 10, 2, 20, -14]] 
+
+    return [] if self.empty?
+    apx_interval = []
+    apx_center = self.find_apx_center
+    
+    recurs = (self.select {|e| e != apx_center })
+    apx_interval << apx_center
+    apx_interval.concat(recurs.find_apx_interval)
+    apx_interval
+  end
+
+end
+
+def rand_array(n, a, b)
+  ary = []
+  size = b - a + 1
+  n.times do
+    ary << ((rand * size).floor + a)
+  end
+  ary
 end
 
 
