@@ -88,6 +88,9 @@ class Array
 end
 
 def rand_array(n, a, b)
+  # Create a random array of size ``n``
+  # Values in the array have range [a, b] inclusive
+
   ary = []
   size = b - a + 1
   n.times do
