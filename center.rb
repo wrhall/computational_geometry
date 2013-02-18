@@ -45,8 +45,8 @@ class Array
     best
   end    
 
-  def find_apx_center
-    m = self.mean
+  def find_apx_center(m=nil)
+    m = self.mean if m == nil
     closest = self.first
     self.each do |elt|
       if (elt - m).abs < (closest - m).abs
@@ -67,12 +67,24 @@ class Array
     apx_interval = []
     apx_center = self.find_apx_center
     
-    recurs = (self.select {|e| e != apx_center })
+    recurs = self.select {|e| e != apx_center }
     apx_interval << apx_center
     apx_interval.concat(recurs.find_apx_interval)
     apx_interval
   end
 
+  def find_apx_interval2(m=nil)
+    return [] if self.empty?
+
+    m = self.mean if m == nil
+    apx_interval = []
+    apx_center = self.find_apx_center(m)
+
+    recurs = self.select {|e| e != apx_center }
+    apx_interval << apx_center
+    apx_interval.concat(recurs.find_apx_interval2(m))
+    apx_interval
+  end
 end
 
 def rand_array(n, a, b)
@@ -82,6 +94,10 @@ def rand_array(n, a, b)
     ary << ((rand * size).floor + a)
   end
   ary
+end
+
+def diff(a)
+  a.last - a.first
 end
 
 
