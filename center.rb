@@ -32,8 +32,7 @@ class Array
     size = 1.0 / 0
     best = []
     self.permutation.each do |permutation|
-      i = permutation.find_interval
-      current = i.last - i.min
+      current = diff(permutation.find_interval)
       if current < size
         size = current
         best = []
