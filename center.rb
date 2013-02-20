@@ -11,13 +11,12 @@ class Array
     max = -1.0 / 0
     min = 1.0 / 0
     b = []
-    sum = 0.0 # should check to see if it's faster
-            # to make sum a float initially or convert it in the loop
+    sum = 0.0
     current = 0
 
     self.each_index do |i|
       sum += self[i]
-      current = sum / (i + 1) # see above comment
+      current = sum / (i + 1)
       if current < min
         min = current
         end
@@ -42,7 +41,17 @@ class Array
       end
     end
     best
-  end    
+  end
+  
+  def find_best_interval_incremental
+    all_possibilities = []
+    
+    self.each do |elt|
+      all_possibilities << elt
+    end
+    
+    
+  end
 
   def find_apx_center(m=nil)
     m = self.mean if m == nil
@@ -106,16 +115,22 @@ end
 if __FILE__ == $0
 
 
-  # i = [-1, 2, 3, 5, 9, 13].find_best_interval.first
-  # print i, "\n"
-  # print i.find_interval, "\n"
+#   # i = [-1, 2, 3, 5, 9, 13].find_best_interval.first
+#   # print i, "\n"
+#   # print i.find_interval, "\n"
+# 
+#   a = (1..7).to_a
+#   a << -1 * (a.sum)
+#   puts a.sum
+#   # print a.find_best_interval, "\n"
+#   aa = a.find_best_interval
+# #  puts aa.length
+# #  print aa.map { |e| e.last }, "\n"
+#   print aa.first.find_interval, "\n"
 
-  a = (1..7).to_a
-  a << -1 * (a.sum)
-  puts a.sum
-  # print a.find_best_interval, "\n"
-  aa = a.find_best_interval
-#  puts aa.length
-#  print aa.map { |e| e.last }, "\n"
-  print aa.first.find_interval, "\n"
+  1000.times do
+    z = rand_array(9, -50, 50)
+    zz = z.find_best_interval
+    print zz, " ", zz.first.find_interval, "\n"
+  end
 end

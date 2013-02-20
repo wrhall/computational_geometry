@@ -6,9 +6,17 @@ require "./center"
 
 a = (0..100).to_a
 
+b = rand_array(9, -100, 100)
+c = rand_array(10, -100, 100)
+
 Benchmark.bm(7) do |x|
-  x.report("first:")  { (1..10000).each { a.find_interval } }
-  x.report("second:") { (1..10000).each { a.find_interval2 } }
+  x.report("first:")  { 10000.times { a.find_interval } }
+  x.report("second:") { 10000.times { a.find_interval } }
+end
+
+Benchmark.bm(7) do |x|
+  x.report("first:")  { 1.times { b.find_best_interval } }
+  x.report("second:") { 1.times { c.find_best_interval } }
 end
 
 # b = (0..7).to_a
