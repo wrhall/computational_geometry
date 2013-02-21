@@ -93,6 +93,11 @@ class Array
     apx_interval.concat(recurs.find_apx_interval2(m))
     apx_interval
   end
+  
+  def find_interval_keep_small
+    
+  end
+  
 end
 
 def rand_array(n, a, b)
@@ -104,13 +109,49 @@ def rand_array(n, a, b)
   n.times do
     ary << ((rand * size).floor + a)
   end
-  ary
+  ary.uniq
 end
 
 def diff(a)
   a.last - a.first
 end
 
+def get_opt
+  a = rand_array(9, -50, 50)
+  a.find_best_interval
+end
+
+def test_alternating
+  opt_solutions = get_opt()
+  opt_solutions.each do |ary|
+  
+    prev = nil
+    state = 0
+    ary.each do |elt|
+      if prev.nil?
+        prev = elt
+        next
+      end
+      past_state = state
+      state = elt - prev
+      if (past_state > 0 and state > 0) or (past_state < 0 and state < 0)
+        break
+      elsif elt == ary.last
+        return ary
+      end
+    end
+  end
+  return opt_solutions
+end
+
+def run_alternating_test
+  10000.times do
+    z = test_alternating
+    if z.first.class == Array
+      return z
+    end
+  end
+end
 
 if __FILE__ == $0
 
@@ -127,10 +168,11 @@ if __FILE__ == $0
 # #  puts aa.length
 # #  print aa.map { |e| e.last }, "\n"
 #   print aa.first.find_interval, "\n"
+print run_alternating_test
 
-  1000.times do
-    z = rand_array(9, -50, 50)
-    zz = z.find_best_interval
-    print zz, " ", zz.first.find_interval, "\n"
-  end
+#   1000.times do
+#     zz = get_opt
+#     print zz, "\n", "interval: ", zz.first.find_interval, " | c_n: ", zz.first.mean, " | interval mean: ", zz.first.find_interval.mean, "\n"
+#     print "--------------------------------------------------------------\n"
+#   end
 end
