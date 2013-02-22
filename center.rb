@@ -97,7 +97,6 @@ class Array
   def find_interval_keep_small
     
   end
-  
 end
 
 def rand_array(n, a, b)
@@ -146,10 +145,21 @@ end
 
 def test_c1_equals_cn
   opt_solutions = get_opt(7)
-  apx_center = opt_solutions.first.find_apx_center
-  median = opt_solutions.first.sort[3]
+  an_opt = opt_solutions.first
+  sorted_order = an_opt.sort
+  
+  apx_center = an_opt.find_apx_center
+  center_index = sorted_order.find_index(apx_center)
+  direction = an_opt.mean - apx_center
+  opposite_center = apx_center
+  if direction < 0
+    opposite_center = sorted_order[center_index - 1]
+  elsif direction > 0
+    opposite_center = sorted_order[center_index + 1]
+  end
+#   median = opt_solutions.first.sort[3]
   opt_solutions.each do |ary|
-    return ary if ary.first == apx_center || ary.first == median
+    return ary if ary.first == apx_center || ary.first == opposite_center
   end
   opt_solutions
 end
@@ -162,24 +172,30 @@ def run_alternating_test
 end
 
 def run_c1_cn_test
-  10000.times do
+  1000.times do
     z = test_c1_equals_cn
     return z if z.first.class == Array
   end
+  nil
 end
 
 def pretty_print(aa)
+  
   print aa, "\n"
-  print "Sorted:   ", aa.first.sort, "\n"
-  print "Interval: ", aa.first.find_interval, "\n"
-  print "Mean:     ", aa.first.mean, "\n"
-  print "----------------------------------\n\n"
+  unless aa.nil?
+    print "Sorted:   ", aa.first.sort, "\n"
+    print "Interval: ", aa.first.find_interval, "\n"
+    print "Mean:     ", aa.first.mean, "\n"
+    print "----------------------------------\n\n"
+  end
 end
 
 if __FILE__ == $0
 
 
- pretty_print(run_c1_cn_test)
+  pretty_print(run_c1_cn_test)
+
+   
 
 #   1000.times do
 #     zz = get_opt
