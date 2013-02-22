@@ -116,8 +116,8 @@ def diff(a)
   a.last - a.first
 end
 
-def get_opt
-  a = rand_array(9, -50, 50)
+def get_opt(n=9)
+  a = rand_array(n, -50, 50)
   a.find_best_interval
 end
 
@@ -144,12 +144,26 @@ def test_alternating
   return opt_solutions
 end
 
+def test_c1_equals_cn
+  opt_solutions = get_opt(6)
+  apx_center = opt_solutions.first.find_apx_center
+  opt_solutions.each do |ary|
+    return ary if ary.first == apx_center
+  end
+  opt_solutions
+end
+
 def run_alternating_test
   10000.times do
     z = test_alternating
-    if z.first.class == Array
-      return z
-    end
+    return z if z.first.class == Array
+  end
+end
+
+def run_c1_cn_test
+  10000.times do
+    z = test_c1_equals_cn
+    return z if z.first.class == Array
   end
 end
 
@@ -168,7 +182,7 @@ if __FILE__ == $0
 # #  puts aa.length
 # #  print aa.map { |e| e.last }, "\n"
 #   print aa.first.find_interval, "\n"
-print run_alternating_test
+print run_c1_cn_test
 
 #   1000.times do
 #     zz = get_opt
