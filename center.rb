@@ -145,10 +145,11 @@ def test_alternating
 end
 
 def test_c1_equals_cn
-  opt_solutions = get_opt(6)
+  opt_solutions = get_opt(7)
   apx_center = opt_solutions.first.find_apx_center
+  median = opt_solutions.first.sort[3]
   opt_solutions.each do |ary|
-    return ary if ary.first == apx_center
+    return ary if ary.first == apx_center || ary.first == median
   end
   opt_solutions
 end
@@ -167,6 +168,14 @@ def run_c1_cn_test
   end
 end
 
+def pretty_print(aa)
+  print aa, "\n"
+  print "Sorted:   ", aa.first.sort, "\n"
+  print "Interval: ", aa.first.find_interval, "\n"
+  print "Mean:     ", aa.first.mean, "\n"
+  print "----------------------------------\n\n"
+end
+
 if __FILE__ == $0
 
 
@@ -182,7 +191,7 @@ if __FILE__ == $0
 # #  puts aa.length
 # #  print aa.map { |e| e.last }, "\n"
 #   print aa.first.find_interval, "\n"
-print run_c1_cn_test
+pretty_print(run_c1_cn_test)
 
 #   1000.times do
 #     zz = get_opt
