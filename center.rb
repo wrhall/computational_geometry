@@ -179,23 +179,10 @@ end
 if __FILE__ == $0
 
 
-#   # i = [-1, 2, 3, 5, 9, 13].find_best_interval.first
-#   # print i, "\n"
-#   # print i.find_interval, "\n"
-# 
-#   a = (1..7).to_a
-#   a << -1 * (a.sum)
-#   puts a.sum
-#   # print a.find_best_interval, "\n"
-#   aa = a.find_best_interval
-# #  puts aa.length
-# #  print aa.map { |e| e.last }, "\n"
-#   print aa.first.find_interval, "\n"
-pretty_print(run_c1_cn_test)
+ pretty_print(run_c1_cn_test)
 
 #   1000.times do
 #     zz = get_opt
-#     print zz, "\n", "interval: ", zz.first.find_interval, " | c_n: ", zz.first.mean, " | interval mean: ", zz.first.find_interval.mean, "\n"
-#     print "--------------------------------------------------------------\n"
+#     pretty_print(zz)
 #   end
 end
