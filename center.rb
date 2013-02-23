@@ -120,6 +120,23 @@ def get_opt(n=9)
   a.find_best_interval
 end
 
+def heuristic_breaker
+  worst_example = []
+  interval = 0
+  10000.times do
+    an_opt = get_opt(6).first
+    apx = an_opt.find_apx_interval
+    o = diff(an_opt.find_interval)
+    a = diff(   apx.find_interval)
+  
+    if a.to_f / o > interval
+      interval = a.to_f / o
+      worst_example = [an_opt, apx, interval]
+    end
+  end
+  worst_example
+end
+
 def test_alternating
   opt_solutions = get_opt()
   opt_solutions.each do |ary|
@@ -193,9 +210,11 @@ end
 if __FILE__ == $0
 
 
-  pretty_print(run_c1_cn_test)
-
-   
+  # pretty_print(run_c1_cn_test)
+  hb = heuristic_breaker
+  pretty_print([hb[0]])
+  pretty_print([hb[1]])
+  puts hb[2]
 
 #   1000.times do
 #     zz = get_opt
