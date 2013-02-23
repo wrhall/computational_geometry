@@ -1,3 +1,6 @@
+
+
+
 class Array
   def sum
     self.inject(0) {|i, j| i + j}
@@ -110,10 +113,32 @@ class Array
 
   def find_apx_interval3
     # Greedily minimize the distance from c_i to c_i+1
+    apx_interval = [find_apx_center]
+    remaining_elements = self.delete_one(apx_interval.first)
+    until remaining_elements.length == 0 do
+      current_sum = apx_interval.sum
+      current_center = apx_interval.mean
+
+      next_point = remaining_elements.first
+      next_center = (current_sum + next_point).to_f / (apx_interval.length + 1)
+
+      difference = (current_center - next_center).abs
+      
+      remaining_elements.each do |elt|
+        next_center = (current_sum + elt).to_f / (apx_interval.length + 1)
+        if (current_center - next_center).abs < difference
+          next_point = elt
+          difference = (current_center - next_center).abs
+        end
+      end
+      apx_interval << next_point
+      remaining_elements = remaining_elements.delete_one(next_point)      
+    end
+    apx_interval
   end
 
   def find_ratio
-    diff(self.find_apx_interval2.find_interval) / diff(self.find_best_interval.first.find_interval)
+    diff(self.find_apx_interval3.find_interval) / diff(self.find_best_interval.first.find_interval)
   end
 
   def perturb_worse
@@ -176,7 +201,7 @@ def heuristic_breaker(n=6)
   interval = 0
   10000.times do
     an_opt = get_opt(n).first
-    apx = an_opt.find_apx_interval2
+    apx = an_opt.find_apx_interval3
     o = diff(an_opt.find_interval)
     a = diff(   apx.find_interval)
   
