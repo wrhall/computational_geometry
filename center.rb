@@ -63,7 +63,14 @@ class Array
     end
     closest
   end
-
+  
+  def delete_one(elt)
+    ret = Array.new(self)
+    index = ret.index(elt)
+    ret.delete_at(index)
+    ret
+  end
+  
   def find_apx_interval
     # why it fails: (0.15 off from opt)
     # 1.9.3-p194 :085 > a.find_apx_interval
@@ -75,24 +82,22 @@ class Array
     apx_interval = []
     apx_center = self.find_apx_center
     
-    # recurs = self.select {|e| e != apx_center }
-    recurs = Array.new(self)
-    center_index = recurs.index(apx_center)
+    smaller = self.delete_one(apx_center)
     
     apx_interval << apx_center
-    apx_interval.concat(recurs.find_apx_interval)
+    apx_interval.concat(smaller.find_apx_interval)
     apx_interval
   end
 
   def find_apx_interval2(m=nil)
+    # Add the element closest to C_n
+
     return [] if self.empty?
 
     m = self.mean if m == nil
     apx_interval = []
     apx_center = self.find_apx_center(m)
-    smaller = Array.new(self)
-    center_index = smaller.find_index(apx_center)
-    smaller.delete_at(center_index)
+    smaller = self.delete_one(apx_center)
 
     apx_interval << apx_center
     apx_interval.concat(smaller.find_apx_interval2(m))
@@ -103,8 +108,8 @@ class Array
     
   end
 
-  def apx_min_next_ci
-    
+  def find_apx_interval3
+    # Greedily minimize the distance from c_i to c_i+1
   end
 
   def find_ratio
@@ -129,6 +134,14 @@ class Array
         increment = -1
       end
     end
+  end
+
+  def perturb_to_worst
+    begin
+      ratio = self.find_ratio
+      perturb_worse
+      new_ratio = self.find_ratio
+    end while new_ratio > ratio
   end
 
 end
