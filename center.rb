@@ -75,7 +75,10 @@ class Array
     apx_interval = []
     apx_center = self.find_apx_center
     
-    recurs = self.select {|e| e != apx_center }
+    # recurs = self.select {|e| e != apx_center }
+    recurs = Array.new(self)
+    center_index = recurs.index(apx_center)
+    
     apx_interval << apx_center
     apx_interval.concat(recurs.find_apx_interval)
     apx_interval
@@ -87,16 +90,47 @@ class Array
     m = self.mean if m == nil
     apx_interval = []
     apx_center = self.find_apx_center(m)
+    smaller = Array.new(self)
+    center_index = smaller.find_index(apx_center)
+    smaller.delete_at(center_index)
 
-    recurs = self.select {|e| e != apx_center }
     apx_interval << apx_center
-    apx_interval.concat(recurs.find_apx_interval2(m))
+    apx_interval.concat(smaller.find_apx_interval2(m))
     apx_interval
   end
   
   def find_interval_keep_small
     
   end
+
+  def apx_min_next_ci
+    
+  end
+
+  def find_ratio
+    diff(self.find_apx_interval2.find_interval) / diff(self.find_best_interval.first.find_interval)
+  end
+
+  def perturb_worse
+    ratio = self.find_ratio
+    self.each_index do |index|
+      increment = 1.0
+      2.times do
+        10.times do
+          new_ratio = ratio + 1
+          while new_ratio > ratio
+            ratio = self.find_ratio
+            self[index] += increment
+            new_ratio = self.find_ratio
+          end
+          self[index] -= increment
+          increment /= 10
+        end
+        increment = -1
+      end
+    end
+  end
+
 end
 
 def rand_array(n, a, b)
@@ -104,28 +138,32 @@ def rand_array(n, a, b)
   # Values in the array have range [a, b] inclusive
 
   ary = []
-  size = b - a + 1
-  n.times do
-    ary << ((rand * size).floor + a)
+  while ary.length != n
+    ary = []
+    size = b - a + 1
+    n.times do
+      ary << ((rand * size).floor + a)
+    end
+    ary.uniq!
   end
-  ary.uniq
+  ary
 end
 
 def diff(a)
   a.last - a.first
 end
 
-def get_opt(n=9)
-  a = rand_array(n, -50, 50)
+def get_opt(n=7)
+  a = rand_array(n, -10000, 10000)
   a.find_best_interval
 end
 
-def heuristic_breaker
+def heuristic_breaker(n=6)
   worst_example = []
   interval = 0
   10000.times do
-    an_opt = get_opt(6).first
-    apx = an_opt.find_apx_interval
+    an_opt = get_opt(n).first
+    apx = an_opt.find_apx_interval2
     o = diff(an_opt.find_interval)
     a = diff(   apx.find_interval)
   
@@ -135,6 +173,17 @@ def heuristic_breaker
     end
   end
   worst_example
+end
+
+def test_threes
+  opt = get_opt(3)
+  sorted = opt.first.sort
+  opt.each do |ordering|
+    if ordering[0] != sorted[1]
+      return opt
+    end
+  end
+  return nil
 end
 
 def test_alternating
@@ -188,6 +237,15 @@ def run_alternating_test
   end
 end
 
+def run_threes_test
+  examples = []
+  100000.times do
+    a = test_threes
+    examples << a if a
+  end
+  examples
+end
+
 def run_c1_cn_test
   1000.times do
     z = test_c1_equals_cn
@@ -209,12 +267,12 @@ end
 
 if __FILE__ == $0
 
-
+  print run_threes_test
   # pretty_print(run_c1_cn_test)
-  hb = heuristic_breaker
-  pretty_print([hb[0]])
-  pretty_print([hb[1]])
-  puts hb[2]
+#  hb = heuristic_breaker
+#  pretty_print([hb[0]])
+#  pretty_print([hb[1]])
+#  puts hb[2]
 
 #   1000.times do
 #     zz = get_opt
