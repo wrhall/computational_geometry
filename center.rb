@@ -1,6 +1,3 @@
-
-
-
 class Array
   def sum
     self.inject(0) {|i, j| i + j}
@@ -28,6 +25,14 @@ class Array
       end
     end
     [min, max]
+  end
+
+  def find_successive_intervals
+    intervals = []
+    (1..self.length).each do |i|
+      intervals << [self.slice(0, i).find_interval, self.slice(0, i).mean]
+    end
+    intervals
   end
 
   def find_best_interval
@@ -138,7 +143,7 @@ class Array
   end
 
   def find_ratio
-    diff(self.find_apx_interval3.find_interval) / diff(self.find_best_interval.first.find_interval)
+    diff(self.find_apx_interval.find_interval) / diff(self.find_best_interval.first.find_interval)
   end
 
   def perturb_worse
@@ -168,6 +173,12 @@ class Array
       new_ratio = self.find_ratio
     end while new_ratio > ratio
   end
+
+  def zero_mean
+    m = self.mean
+    self.map { |e| e - m }
+  end
+
 
 end
 
@@ -201,7 +212,7 @@ def heuristic_breaker(n=6)
   interval = 0
   10000.times do
     an_opt = get_opt(n).first
-    apx = an_opt.find_apx_interval3
+    apx = an_opt.find_apx_interval
     o = diff(an_opt.find_interval)
     a = diff(   apx.find_interval)
   
@@ -222,6 +233,37 @@ def pretty_print(aa)
     print "Mean:     ", aa.first.mean, "\n"
     print "----------------------------------\n\n"
   end
+end
+
+def print_intervals(ordering)
+  intervals = ordering.find_successive_intervals
+  intervals.each do |i|
+    print i, "\n" 
+  end
+
+end
+
+def apx_print(a)
+  print a, "\n"
+  print "Mean:  ", a.mean, "\n"
+  print "Ratio: ", a.find_ratio, "\n"
+  print "Intervals: \n"
+  print_intervals(a);
+end
+
+def main
+  hb = heuristic_breaker
+  apx_sequence = Array.new(hb[1])
+  apx_sequence.perturb_to_worst
+  apx_sequence.map! { |e| e.round(2) }
+  centered_sequence = apx_sequence.zero_mean
+  pretty_print([centered_sequence])
+  apx_print(centered_sequence)
+  best = centered_sequence.find_best_interval
+  print "\n", best, "\n"
+  print "Best Intervals: ", "\n"
+  print_intervals(best.first);
+  print "\n-------------------------------------------------\n\n"
 end
 
 if __FILE__ == $0
