@@ -210,7 +210,7 @@ end
 def heuristic_breaker(n=6)
   worst_example = []
   interval = 0
-  10000.times do
+  100.times do
     an_opt = get_opt(n).first
     apx = an_opt.find_apx_interval
     o = diff(an_opt.find_interval)
@@ -252,7 +252,7 @@ def apx_print(a)
 end
 
 def main
-  hb = heuristic_breaker
+  hb = heuristic_breaker(8)
   apx_sequence = Array.new(hb[1])
   apx_sequence.perturb_to_worst
   apx_sequence.map! { |e| e.round(2) }
@@ -268,8 +268,8 @@ end
 
 if __FILE__ == $0
 
-  print run_threes_test
-  # pretty_print(run_c1_cn_test)
+  main
+  
 #  hb = heuristic_breaker
 #  pretty_print([hb[0]])
 #  pretty_print([hb[1]])
