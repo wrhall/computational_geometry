@@ -36,7 +36,6 @@ class Array
   end
 
   def find_best_interval
-    # could maybe make it a better apx by running it once in reverse, too (or once shuffled)
     size = 1.0 / 0
     best = []
     self.permutation.each do |permutation|
@@ -109,11 +108,7 @@ class Array
   end
   
   def find_apx_interval
-    # why it fails: (0.15 off from opt)
-    # 1.9.3-p194 :085 > a.find_apx_interval
-    #   => [3, 6, 2, 10, -14, 20] 
-    # 1.9.3-p194 :086 > a.find_best_interval
-    #   => [[6, 10, 2, 3, 20, -14], [6, 10, 3, 2, 20, -14], [6, 3, 10, 2, 20, -14]] 
+    # could maybe make it a better apx by running it once in reverse, too (or once shuffled)
 
     return [] if self.empty?
     apx_interval = []
