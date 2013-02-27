@@ -52,7 +52,10 @@ class Array
   end
 
   def find_best_fast
-    apx_diff = diff(self.find_apx_interval.find_interval)
+    apx_diff = [diff(self.find_apx_interval.find_interval	 ),
+		diff(self.reverse.find_apx_interval.find_interval),
+		diff(self.find_apx_interval2.find_interval       ),
+		diff(self.find_apx_interval3.find_interval 	 )].min
     best = []
     best_diff = apx_diff
     big_ary = self.map { |e| [[e], self.delete_one(e)] }
