@@ -36,6 +36,7 @@ class Array
   end
 
   def find_best_interval
+    # could maybe make it a better apx by running it once in reverse, too (or once shuffled)
     size = 1.0 / 0
     best = []
     self.permutation.each do |permutation|
@@ -46,6 +47,34 @@ class Array
         best << permutation
       elsif current == size
         best << permutation
+      end
+    end
+    best
+  end
+
+  def find_best_fast
+    apx_diff = diff(self.find_apx_interval.find_interval)
+    best = []
+    best_diff = apx_diff
+    big_ary = self.map { |e| [[e], self.delete_one(e)] }
+    big_ary.each do |elt| # could be more memory efficient by using 'shift'
+    		    	  # to do that we would need to make this a different loop
+			  # each would skip elements if we did that
+      if elt.last != []
+	if diff(elt.first.find_interval) <= apx_diff
+	  elt.last.each do |e|
+	    big_ary << [elt.first + [e], elt.last.delete_one(e)]
+	  end
+	end
+      else
+        # Score it, since it's final
+	current_diff = diff(elt.first.find_interval)
+	if current_diff < best_diff
+	  best = [elt.first]
+	  best_diff = current_diff
+	elsif current_diff == best_diff
+	  best << elt.first
+	end
       end
     end
     best
