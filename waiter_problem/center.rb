@@ -160,6 +160,29 @@ class Array
     apx_interval
   end
 
+  def find_apx_interval4
+    # Try to make c_{i+1} as close to c_n (or the mean) as possible
+    mean = self.mean
+    unused = Array.new(self)
+    apx_interval = []
+
+    while unused != []
+      sum = apx_interval.sum
+      candidate = unused.first
+      next_mean = (sum + candidate).to_f / (apx_interval.length + 1)
+      unused.each do |elt|
+        test_mean = (sum + elt).to_f / (apx_interval.length + 1)
+	if (test_mean - mean).abs < (next_mean - mean).abs
+	  candidate = elt
+	  next_mean = test_mean
+	end
+      end
+      apx_interval << candidate
+      unused = unused.delete_one(candidate)
+    end
+    apx_interval
+  end
+
   def find_ratio
     diff(self.find_apx_interval.find_interval) / diff(self.find_best_fast.first.find_interval)
   end
@@ -228,7 +251,7 @@ end
 def heuristic_breaker(n=6)
   worst_example = []
   interval = 0
-  1000.times do
+  10000.times do
     an_opt = get_opt(n).first
     apx = an_opt.sort.find_apx_interval
     o = diff(an_opt.find_interval)
