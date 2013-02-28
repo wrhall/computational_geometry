@@ -52,46 +52,37 @@ class Array
   end
 
   def find_best_fast
+    # Avgs: < 3 seconds per ary up to size 11
     apx_diff = [diff(self.find_apx_interval.find_interval	 ),
-		diff(self.reverse.find_apx_interval.find_interval),
-		diff(self.find_apx_interval2.find_interval       ),
-		diff(self.find_apx_interval3.find_interval 	 )].min
+    diff(self.reverse.find_apx_interval.find_interval),
+    diff(self.find_apx_interval2.find_interval       ),
+    diff(self.find_apx_interval3.find_interval 	 )].min
     best = []
     best_diff = apx_diff
     big_ary = self.map { |e| [[e], self.delete_one(e)] }
     big_ary.each do |elt| # could be more memory efficient by using 'shift'
-    		    	  # to do that we would need to make this a different loop
-			  # each would skip elements if we did that
+                          # to do that we would need to make this a different loop
+                          # each would skip elements if we did that
       if elt.last != []
-	if diff(elt.first.find_interval) <= apx_diff
-	  elt.last.each do |e|
-	    big_ary << [elt.first + [e], elt.last.delete_one(e)]
-	  end
-	end
+        if diff(elt.first.find_interval) <= apx_diff
+          elt.last.each do |e|
+            big_ary << [elt.first + [e], elt.last.delete_one(e)]
+          end
+        end
       else
         # Score it, since it's final
-	current_diff = diff(elt.first.find_interval)
-	if current_diff < best_diff
-	  best = [elt.first]
-	  best_diff = current_diff
-	elsif current_diff == best_diff
-	  best << elt.first
-	end
+        current_diff = diff(elt.first.find_interval)
+        if current_diff < best_diff
+          best = [elt.first]
+          best_diff = current_diff
+        elsif current_diff == best_diff
+          best << elt.first
+        end
       end
     end
     best
   end
   
-  def find_best_interval_incremental
-    all_possibilities = []
-    
-    self.each do |elt|
-      all_possibilities << elt
-    end
-    
-    
-  end
-
   def find_apx_center(m=nil)
     m = self.mean if m == nil
     closest = self.first
@@ -170,7 +161,7 @@ class Array
   end
 
   def find_ratio
-    diff(self.find_apx_interval.find_interval) / diff(self.find_best_interval.first.find_interval)
+    diff(self.find_apx_interval.find_interval) / diff(self.find_best_fast.first.find_interval)
   end
 
   def perturb_worse
@@ -178,7 +169,7 @@ class Array
     self.each_index do |index|
       increment = 1.0
       2.times do
-        10.times do
+        5.times do
           new_ratio = ratio + 1
           while new_ratio > ratio
             ratio = self.find_ratio
@@ -188,7 +179,7 @@ class Array
           self[index] -= increment
           increment /= 10
         end
-        increment = -1
+        increment = -1.0
       end
     end
   end
@@ -231,7 +222,7 @@ end
 
 def get_opt(n=7)
   a = rand_array(n, -10000, 10000)
-  a.find_best_interval
+  a.find_best_fast
 end
 
 def heuristic_breaker(n=6)
@@ -279,14 +270,15 @@ def apx_print(a)
 end
 
 def main
-  hb = heuristic_breaker(8)
+  hb = heuristic_breaker(7)
   apx_sequence = Array.new(hb[1])
   apx_sequence.perturb_to_worst
   apx_sequence.map! { |e| e.round(2) }
   centered_sequence = apx_sequence.zero_mean
+  centered_sequence.map! { |e| e.round(5) }
   pretty_print([centered_sequence])
   apx_print(centered_sequence)
-  best = centered_sequence.find_best_interval
+  best = centered_sequence.find_best_fast
   print "\n", best, "\n"
   print "Best Intervals: ", "\n"
   print_intervals(best.first);
@@ -294,9 +286,9 @@ def main
 end
 
 if __FILE__ == $0
-
-  main
-  
+  5.times do
+    main
+  end
 #  hb = heuristic_breaker
 #  pretty_print([hb[0]])
 #  pretty_print([hb[1]])

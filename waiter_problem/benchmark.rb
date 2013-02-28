@@ -20,12 +20,13 @@ e = rand_array(12, -100, 100)
 #   x.report("first:")  { 1.times { b.find_best_interval } }
 #   x.report("second:") { 1.times { c.find_best_interval } }
 # end
+tries = 100
 
-Benchmark.bm(7) do |x|
-  x.report("nine:")	{1.times { b.find_best_fast } }
-  x.report("ten:")	{1.times { c.find_best_fast } }
-  x.report("eleven:")	{1.times { d.find_best_fast } }
-#   x.report("twelve:")	{1.times { e.find_best_fast } }
+Benchmark.bm(10) do |x|
+  x.report("9 -- Sum of " + tries.to_s   + ":")	{(tries/1).times { b = rand_array( 9, -100, 100); b.find_best_fast } }
+  x.report("10 - Sum of " + (tries/2).to_s + ":")	{(tries/2).times { c = rand_array(10, -100, 100); c.find_best_fast } }
+  x.report("11 - Sum of " + (tries/4).to_s + ":")	{(tries/4).times { d = rand_array(11, -100, 100); d.find_best_fast } }
+  x.report("12 - Sum of " + (tries/8).to_s + ":")	{(tries/8).times { d = rand_array(12, -100, 100); d.find_best_fast } }
 end
 # b = (0..7).to_a
 # Benchmark.bm(7) do |x|
