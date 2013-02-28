@@ -56,7 +56,8 @@ class Array
     apx_diff = [diff(self.find_apx_interval.find_interval	 ),
     diff(self.reverse.find_apx_interval.find_interval),
     diff(self.find_apx_interval2.find_interval       ),
-    diff(self.find_apx_interval3.find_interval 	 )].min
+    diff(self.find_apx_interval3.find_interval 	     ),
+    diff(self.find_apx_interval4.find_interval	     )].min
     best = []
     best_diff = apx_diff
     big_ary = self.map { |e| [[e], self.delete_one(e)] }
@@ -183,6 +184,17 @@ class Array
     apx_interval
   end
 
+  def improved_heuristic
+    # could make it take a parameter f that determines which heuristic to use
+    sorted = self.sort
+    a = sorted.find_apx_interval4
+    b = sorted.reverse.find_apx_interval4
+    if diff(a.find_interval) <= diff(b.find_interval)
+      a
+    end
+    b
+  end
+
   def find_ratio
     diff(self.find_apx_interval.find_interval) / diff(self.find_best_fast.first.find_interval)
   end
@@ -253,6 +265,7 @@ def heuristic_breaker(n=6)
   interval = 0
   10000.times do
     an_opt = get_opt(n).first
+#     apx = an_opt.improved_heuristic
     apx = an_opt.sort.find_apx_interval
     o = diff(an_opt.find_interval)
     a = diff(   apx.find_interval)
