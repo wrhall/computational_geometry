@@ -228,9 +228,9 @@ end
 def heuristic_breaker(n=6)
   worst_example = []
   interval = 0
-  100.times do
+  1000.times do
     an_opt = get_opt(n).first
-    apx = an_opt.find_apx_interval
+    apx = an_opt.sort.find_apx_interval
     o = diff(an_opt.find_interval)
     a = diff(   apx.find_interval)
   
@@ -286,9 +286,11 @@ def main
 end
 
 if __FILE__ == $0
-  5.times do
-    main
-  end
+  print heuristic_breaker(9)
+
+#   5.times do
+#     main
+#   end
 #  hb = heuristic_breaker
 #  pretty_print([hb[0]])
 #  pretty_print([hb[1]])
