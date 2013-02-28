@@ -60,9 +60,8 @@ class Array
     best = []
     best_diff = apx_diff
     big_ary = self.map { |e| [[e], self.delete_one(e)] }
-    big_ary.each do |elt| # could be more memory efficient by using 'shift'
-                          # to do that we would need to make this a different loop
-                          # each would skip elements if we did that
+    while big_ary != []
+      elt = big_ary.first
       if elt.last != []
         if diff(elt.first.find_interval) <= apx_diff
           elt.last.each do |e|
@@ -79,6 +78,7 @@ class Array
           best << elt.first
         end
       end
+      big_ary.shift
     end
     best
   end
