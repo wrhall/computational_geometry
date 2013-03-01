@@ -196,7 +196,7 @@ class Array
   end
 
   def find_ratio
-    diff(self.find_apx_interval.find_interval) / diff(self.find_best_fast.first.find_interval)
+    diff(self.find_apx_interval4.find_interval) / diff(self.find_best_fast.first.find_interval)
   end
 
   def perturb_worse
@@ -266,7 +266,7 @@ def heuristic_breaker(n=6)
   10000.times do
     an_opt = get_opt(n).first
 #     apx = an_opt.improved_heuristic
-    apx = an_opt.sort.find_apx_interval
+    apx = an_opt.sort.find_apx_interval4
     o = diff(an_opt.find_interval)
     a = diff(   apx.find_interval)
   
@@ -276,6 +276,25 @@ def heuristic_breaker(n=6)
     end
   end
   worst_example
+end
+
+def is_2k_apx
+  k = 2
+  i = 0
+  worst = [[], [], [], 0, 0, 0]
+  loop do
+    i += 1
+    print worst, "\n\n" if i % 1500 == 0
+    r = rand_array(8, -1000, 1000)
+    r_opt = r.find_best_fast.first
+    r_apx = r.find_apx_interval4 # NOTE WHICH APX INTERVAL FINDER THIS IS
+    opt_length = diff(r_opt.find_interval)
+    interval = r_apx.find_interval
+    mean = r.mean
+    diff = [(interval.first - mean).abs, (interval.last - mean).abs].max
+    worst = [r_opt, r_apx, interval, mean, diff, opt_length, diff / opt_length] if diff / opt_length > worst.last
+    return [r_opt, r_apx, interval, mean, diff, opt_length, diff / opt_length] if diff > k*opt_length
+  end
 end
 
 def pretty_print(aa)
@@ -306,7 +325,7 @@ def apx_print(a)
 end
 
 def main
-  hb = heuristic_breaker(7)
+  hb = heuristic_breaker(9)
   apx_sequence = Array.new(hb[1])
   apx_sequence.perturb_to_worst
   apx_sequence.map! { |e| e.round(2) }
@@ -322,8 +341,8 @@ def main
 end
 
 if __FILE__ == $0
-  print heuristic_breaker(9)
-
+#   print heuristic_breaker(9)
+  main
 #   5.times do
 #     main
 #   end
