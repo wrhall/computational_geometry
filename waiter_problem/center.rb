@@ -123,6 +123,9 @@ class Array
           elsif interval_length == best.first.interval_length
             best << temp_order 
           elsif interval_length < best.first.interval_length
+            # You have to be careful here, since you're playing with a reference.
+            # If you just say best = [temp_order], you'll make a local variable called ``best``,
+            # but you want to modify the array that ``best`` is currently pointing to.
             best.clear
             best << temp_order
           end
