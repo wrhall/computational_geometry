@@ -93,10 +93,10 @@ class Array
   end
 
   def find_best_recursive
+    # The use of ``uniq`` is slightly less efficient than not using it (if no duplicates),
+    # but it dramatically improves the performance if there are duplicates.
     apx_diff = lowest_apx_diff
     best = []
-    # Double check to make sure the .uniq actually makes it faster
-    # Test with no duplicates, 1 duplicate, 2, duplicates, 3 duplicates
     big_ary = self.uniq.map { |e| [[e], self.delete_one(e)] }
     big_ary.each do |elt|
       Array.fb_recurse_method(best, apx_diff, elt.first, elt.last)
@@ -107,25 +107,62 @@ class Array
   def self.fb_recurse_method(best, apx_diff, current_order, unused)
     if diff(current_order.find_interval) <= apx_diff
       if unused.length > 1
-        unused.uniq.each do |elt| # Again check to see if this is more efficient
+        unused.uniq.each do |elt|
           best_diff = best.any? ? best.first.interval_length : apx_diff
-          Array.fb_recurse_method(best, 
-                                  apx_diff, 
-                                  current_order + [elt], 
+          Array.fb_recurse_method(best,
+                                  apx_diff,
+                                  current_order + [elt],
                                   unused.delete_one(elt))
         end
       elsif unused.length == 1
-        unused.each do |elt|
-          temp_order = current_order + [elt]
+        temp_order = current_order + unused
+        interval_length = temp_order.interval_length
+        if best.empty?
+          interval_length <= apx_diff and best << temp_order
+        elsif interval_length == best.first.interval_length
+          best << temp_order 
+        elsif interval_length < best.first.interval_length
+          # You have to be careful here, since you're playing with a reference.
+          # If you just say best = [temp_order], you'll make a local variable called ``best``,
+          # but you want to modify the array that ``best`` is currently pointing to.
+          best.clear
+          best << temp_order
+        end
+      end
+    end
+  end
+
+  def find_best_recursive2
+    # The use of unique makes it slightly less efficient than not using it,
+    # but it dramatically improves the performance if there are duplicates.
+    apx_diff = lowest_apx_diff
+    best = []
+    big_ary = self.uniq.map { |e| [[e], self.delete_one(e)] }
+    big_ary.each do |elt|
+      Array.fb_recurse_method2(best, apx_diff, elt.first, elt.last)
+    end
+    best
+  end
+
+  def self.fb_recurse_method2(best, apx_diff, current_order, unused)
+    if diff(current_order.find_interval) <= apx_diff
+      if unused.length > 2
+        unused.uniq.each do |elt|
+          best_diff = best.any? ? best.first.interval_length : apx_diff
+          Array.fb_recurse_method2(best,
+                                  apx_diff,
+                                  current_order + [elt],
+                                  unused.delete_one(elt))
+        end
+      elsif unused.length <= 3
+        unused.permutation.to_a.uniq.each do |temp|
+          temp_order = current_order + temp
           interval_length = temp_order.interval_length
           if best.empty?
             interval_length <= apx_diff and best << temp_order
           elsif interval_length == best.first.interval_length
             best << temp_order 
           elsif interval_length < best.first.interval_length
-            # You have to be careful here, since you're playing with a reference.
-            # If you just say best = [temp_order], you'll make a local variable called ``best``,
-            # but you want to modify the array that ``best`` is currently pointing to.
             best.clear
             best << temp_order
           end
@@ -134,7 +171,6 @@ class Array
     end
     best
   end
-
   
   def find_apx_center(m=nil)
     m = self.mean if m == nil
