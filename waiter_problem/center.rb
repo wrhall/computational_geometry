@@ -108,6 +108,8 @@ class Array
     if diff(current_order.find_interval) <= apx_diff
       if unused.length > 1
         unused.uniq.each do |elt|
+          # Make ``best_diff`` the current interval size (if we have found a good ordering),
+          # or make it ``apx_diff`` found earlier.
           best_diff = best.any? ? best.first.interval_length : apx_diff
           Array.fb_recurse_method(best,
                                   apx_diff,
@@ -123,8 +125,8 @@ class Array
           best << temp_order 
         elsif interval_length < best.first.interval_length
           # You have to be careful here, since you're playing with a reference.
-          # If you just say best = [temp_order], you'll make a local variable called ``best``,
-          # but you want to modify the array that ``best`` is currently pointing to.
+          # If you just say "best = [temp_order]", you'll make a local variable called ``best``,
+          # but you *want* to modify the array that ``best`` is currently pointing to.
           best.clear
           best << temp_order
         end
