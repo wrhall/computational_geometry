@@ -51,13 +51,17 @@ class Array
     best
   end
 
-  def find_best_fast
-    # Avgs: < 3 seconds per ary up to size 11
-    apx_diff = [diff(self.find_apx_interval.find_interval	 ),
+  def lowest_apx_diff
+    [diff(self.find_apx_interval.find_interval	 ),
     diff(self.reverse.find_apx_interval.find_interval),
     diff(self.find_apx_interval2.find_interval       ),
     diff(self.find_apx_interval3.find_interval 	     ),
     diff(self.find_apx_interval4.find_interval	     )].min
+  end
+
+  def find_best_fast
+    # Avgs: < 3 seconds per ary up to size 11
+    apx_diff = lowest_apx_diff
     best = []
     best_diff = apx_diff
     big_ary = self.map { |e| [[e], self.delete_one(e)] }
@@ -83,6 +87,51 @@ class Array
     end
     best
   end
+  
+  def interval_length
+    diff(self.find_interval)
+  end
+
+  def find_best_recursive
+    apx_diff = lowest_apx_diff
+    best = []
+    # Double check to make sure the .uniq actually makes it faster
+    # Test with no duplicates, 1 duplicate, 2, duplicates, 3 duplicates
+    big_ary = self.uniq.map { |e| [[e], self.delete_one(e)] }
+    big_ary.each do |elt|
+      Array.fb_recurse_method(best, apx_diff, elt.first, elt.last)
+    end
+    best
+  end
+
+  def self.fb_recurse_method(best, apx_diff, current_order, unused)
+    if diff(current_order.find_interval) <= apx_diff
+      if unused.length > 1
+        unused.uniq.each do |elt| # Again check to see if this is more efficient
+          best_diff = best.any? ? best.first.interval_length : apx_diff
+          Array.fb_recurse_method(best, 
+                                  apx_diff, 
+                                  current_order + [elt], 
+                                  unused.delete_one(elt))
+        end
+      elsif unused.length == 1
+        unused.each do |elt|
+          temp_order = current_order + [elt]
+          interval_length = temp_order.interval_length
+          if best.empty?
+            interval_length <= apx_diff and best << temp_order
+          elsif interval_length == best.first.interval_length
+            best << temp_order 
+          elsif interval_length < best.first.interval_length
+            best.clear
+            best << temp_order
+          end
+        end
+      end
+    end
+    best
+  end
+
   
   def find_apx_center(m=nil)
     m = self.mean if m == nil
@@ -237,7 +286,7 @@ end
 
 def rand_array(n, a, b)
   # Create a random array of size ``n``
-  # Values in the array have range [a, b] inclusive
+  # Values in the array are unique and have range [a, b] inclusive
 
   ary = []
   while ary.length != n
