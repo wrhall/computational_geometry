@@ -1,5 +1,53 @@
 # This is a file for some old tests that we made but are done using.
 
+
+
+def find_best_interval
+  # brute force to find opt solutions
+  # defined on the Array class
+  size = 1.0 / 0
+  best = []
+  self.permutation.each do |permutation|
+    current = diff(permutation.find_interval)
+    if current < size
+      size = current
+      best = []
+      best << permutation
+    elsif current == size
+      best << permutation
+    end
+  end
+  best
+end
+
+def find_apx_interval3
+  # Greedily minimize the distance from c_i to c_i+1
+  apx_interval = [find_apx_center]
+  remaining_elements = self.delete_one(apx_interval.first)
+  until remaining_elements.length == 0 do
+    current_sum = apx_interval.sum
+    current_center = apx_interval.mean
+
+    next_point = remaining_elements.first
+    next_center = (current_sum + next_point).to_f / (apx_interval.length + 1)
+
+    difference = (current_center - next_center).abs
+    
+    remaining_elements.each do |elt|
+      next_center = (current_sum + elt).to_f / (apx_interval.length + 1)
+      if (current_center - next_center).abs < difference
+        next_point = elt
+        difference = (current_center - next_center).abs
+      end
+    end
+    apx_interval << next_point
+    remaining_elements = remaining_elements.delete_one(next_point)      
+  end
+  apx_interval
+end
+
+
+
 def test_threes
   # Turns out there are no threes that we could find that don't start in the middle
   # I think this is a provable fact

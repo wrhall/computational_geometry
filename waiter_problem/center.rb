@@ -35,28 +35,15 @@ class Array
     intervals
   end
 
-  def find_best_interval
-    size = 1.0 / 0
-    best = []
-    self.permutation.each do |permutation|
-      current = diff(permutation.find_interval)
-      if current < size
-        size = current
-        best = []
-        best << permutation
-      elsif current == size
-        best << permutation
-      end
-    end
-    best
+  def lowest_apx_diff
+    [self.find_apx_interval.interval_length,
+     self.reverse.find_apx_interval.interval_length,
+     self.find_apx_interval2.interval_length,
+     self.find_apx_interval4.interval_length].min
   end
 
-  def lowest_apx_diff
-    [diff(self.find_apx_interval.find_interval	 ),
-    diff(self.reverse.find_apx_interval.find_interval),
-    diff(self.find_apx_interval2.find_interval       ),
-    diff(self.find_apx_interval3.find_interval 	     ),
-    diff(self.find_apx_interval4.find_interval	     )].min
+  def find_best_interval
+    self.find_best_recursive
   end
 
   def find_best_fast
@@ -68,14 +55,14 @@ class Array
     while big_ary != []
       elt = big_ary.first
       if elt.last != []
-        if diff(elt.first.find_interval) <= apx_diff
+        if elt.first.interval_length <= apx_diff
           elt.last.each do |e|
             big_ary << [elt.first + [e], elt.last.delete_one(e)]
           end
         end
       else
         # Score it, since it's final
-        current_diff = diff(elt.first.find_interval)
+        current_diff = elt.first.interval_length
         if current_diff < best_diff
           best = [elt.first]
           best_diff = current_diff
@@ -105,7 +92,7 @@ class Array
   end
 
   def self.fb_recurse_method(best, apx_diff, current_order, unused)
-    if diff(current_order.find_interval) <= apx_diff
+    if current_order.interval_length <= apx_diff
       if unused.length > 1
         unused.uniq.each do |elt|
           # Make ``best_diff`` the current interval size (if we have found a good ordering),
@@ -134,48 +121,8 @@ class Array
     end
   end
 
-  def find_best_recursive2
-    # The use of unique makes it slightly less efficient than not using it,
-    # but it dramatically improves the performance if there are duplicates.
-    apx_diff = lowest_apx_diff
-    best = []
-    big_ary = self.uniq.map { |e| [[e], self.delete_one(e)] }
-    big_ary.each do |elt|
-      Array.fb_recurse_method2(best, apx_diff, elt.first, elt.last)
-    end
-    best
-  end
-
-  def self.fb_recurse_method2(best, apx_diff, current_order, unused)
-    if diff(current_order.find_interval) <= apx_diff
-      if unused.length > 2
-        unused.uniq.each do |elt|
-          best_diff = best.any? ? best.first.interval_length : apx_diff
-          Array.fb_recurse_method2(best,
-                                  apx_diff,
-                                  current_order + [elt],
-                                  unused.delete_one(elt))
-        end
-      elsif unused.length <= 3
-        unused.permutation.to_a.uniq.each do |temp|
-          temp_order = current_order + temp
-          interval_length = temp_order.interval_length
-          if best.empty?
-            interval_length <= apx_diff and best << temp_order
-          elsif interval_length == best.first.interval_length
-            best << temp_order 
-          elsif interval_length < best.first.interval_length
-            best.clear
-            best << temp_order
-          end
-        end
-      end
-    end
-    best
-  end
-  
   def find_apx_center(m=nil)
-    m = self.mean if m == nil
+    m = self.mean if m.nil?
     closest = self.first
     self.each do |elt|
       if (elt - m).abs < (closest - m).abs
@@ -193,7 +140,7 @@ class Array
   end
   
   def find_apx_interval
-    # could maybe make it a better apx by running it once in reverse, too (or once shuffled)
+    # Picks the x_i closest to the mean of the current unused elements
 
     return [] if self.empty?
     apx_interval = []
@@ -221,38 +168,10 @@ class Array
     apx_interval
   end
   
-  def find_interval_keep_small
-    
-  end
-
-  def find_apx_interval3
-    # Greedily minimize the distance from c_i to c_i+1
-    apx_interval = [find_apx_center]
-    remaining_elements = self.delete_one(apx_interval.first)
-    until remaining_elements.length == 0 do
-      current_sum = apx_interval.sum
-      current_center = apx_interval.mean
-
-      next_point = remaining_elements.first
-      next_center = (current_sum + next_point).to_f / (apx_interval.length + 1)
-
-      difference = (current_center - next_center).abs
-      
-      remaining_elements.each do |elt|
-        next_center = (current_sum + elt).to_f / (apx_interval.length + 1)
-        if (current_center - next_center).abs < difference
-          next_point = elt
-          difference = (current_center - next_center).abs
-        end
-      end
-      apx_interval << next_point
-      remaining_elements = remaining_elements.delete_one(next_point)      
-    end
-    apx_interval
-  end
-
   def find_apx_interval4
     # Try to make c_{i+1} as close to c_n (or the mean) as possible
+    # Currently believed to be a 2-APX
+
     mean = self.mean
     unused = Array.new(self)
     apx_interval = []
@@ -274,19 +193,8 @@ class Array
     apx_interval
   end
 
-  def improved_heuristic
-    # could make it take a parameter f that determines which heuristic to use
-    sorted = self.sort
-    a = sorted.find_apx_interval4
-    b = sorted.reverse.find_apx_interval4
-    if diff(a.find_interval) <= diff(b.find_interval)
-      a
-    end
-    b
-  end
-
   def find_ratio
-    diff(self.find_apx_interval4.find_interval) / diff(self.find_best_fast.first.find_interval)
+    diff(self.find_apx_interval4.find_interval) / diff(self.find_best_recursive.first.find_interval)
   end
 
   def perturb_worse
@@ -318,6 +226,7 @@ class Array
   end
 
   def zero_mean
+    # Returns an array with the same relative values and a sum of 0
     m = self.mean
     self.map { |e| e - m }
   end
@@ -347,8 +256,13 @@ end
 
 def get_opt(n=7)
   a = rand_array(n, -10000, 10000)
-  a.find_best_fast
+  a.find_best_recursive
 end
+
+#################################################
+# Below are some methods to try to determine how
+# good or bad the above heuristics are
+#################################################
 
 def heuristic_breaker(n=6)
   worst_example = []
@@ -376,7 +290,7 @@ def is_2k_apx
     i += 1
     print worst, "\n\n" if i % 1500 == 0
     r = rand_array(8, -1000, 1000)
-    r_opt = r.find_best_fast.first
+    r_opt = r.find_best_recursive.first
     r_apx = r.find_apx_interval4 # NOTE WHICH APX INTERVAL FINDER THIS IS
     opt_length = diff(r_opt.find_interval)
     interval = r_apx.find_interval
@@ -423,7 +337,7 @@ def main
   centered_sequence.map! { |e| e.round(5) }
   pretty_print([centered_sequence])
   apx_print(centered_sequence)
-  best = centered_sequence.find_best_fast
+  best = centered_sequence.find_best_recursive
   print "\n", best, "\n"
   print "Best Intervals: ", "\n"
   print_intervals(best.first);
