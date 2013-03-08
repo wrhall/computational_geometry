@@ -267,7 +267,7 @@ end
 def heuristic_breaker(n=6)
   worst_example = []
   interval = 0
-  10000.times do
+  10.times do
     an_opt = get_opt(n).first
 #     apx = an_opt.improved_heuristic
     apx = an_opt.sort.find_apx_interval4
@@ -345,8 +345,18 @@ def main
 end
 
 if __FILE__ == $0
+  f = File.open("hb1.txt", "a")
+  10.times do
+    hb =  heuristic_breaker(12)
+    print hb, "\n\n"
+    f.write(hb)
+    f.write("\n\n")
+  end
+  
+  f.close
+
 #   print heuristic_breaker(9)
-  main
+#   main
 #   5.times do
 #     main
 #   end
