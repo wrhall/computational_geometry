@@ -26,7 +26,7 @@ class Array
       current = sum / (i + 1)
       if current < min
         min = current
-        end
+      end
       if current > max
         max = current
       end
