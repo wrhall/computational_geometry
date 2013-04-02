@@ -344,16 +344,88 @@ def main
   print "\n-------------------------------------------------\n\n"
 end
 
-if __FILE__ == $0
-  f = File.open("hb1.txt", "a")
-  10.times do
-    hb =  heuristic_breaker(12)
-    print hb, "\n\n"
-    f.write(hb)
-    f.write("\n\n")
-  end
+def test_random_orders
+  a = rand_array(8, -1000, 1000)
+  zeroed = a.zero_mean
+  diameter = zeroed.max - zeroed.min
   
-  f.close
+  opt_order  = zeroed.find_best_interval.first
+  opt_int = opt_order.find_interval
+  opt_diff = diff(opt_int)
+#   print "Opt ordering:     ", opt_order, "\n"
+#   print "Opt interval:     ", opt_diff, "\n"
+  
+  # Average badness
+  random_diffs = []
+  1000.times do
+    r = zeroed.shuffle
+    rand_int = r.find_interval
+    rand_diff = diff(rand_int)
+    random_diffs << rand_diff
+  end
+#   print "Random diffs:     ", random_diffs.mean, "\n"
+#   print "Ratio rand / opt: ", random_diffs.mean.to_f / opt_diff, "\n"
+  return [random_diffs.mean.to_f / opt_diff, random_diffs.mean.to_f / diameter, opt_diff / diameter, opt_order]
+end
+
+def test_big_random_orders
+  a = rand_array(100, -1000, 1000)
+  zeroed = a.zero_mean
+  diameter = zeroed.max - zeroed.min
+  
+#   opt_order  = zeroed.find_best_interval.first
+#   opt_int = opt_order.find_interval
+#   opt_diff = diff(opt_int)
+#   print "Opt ordering:     ", opt_order, "\n"
+#   print "Opt interval:     ", opt_diff, "\n"
+  
+  # Average badness
+  random_diffs = []
+  1000.times do
+    r = zeroed.shuffle
+    rand_int = r.find_interval
+    rand_diff = diff(rand_int)
+    random_diffs << rand_diff
+  end
+#   print "Random diffs:     ", random_diffs.mean, "\n"
+#   print "Ratio rand / opt: ", random_diffs.mean.to_f / opt_diff, "\n"
+  random_diffs.mean.to_f / diameter
+end
+
+# def test_
+
+if __FILE__ == $0
+  k = 500
+#   worst = [0]
+#   sum_opt_diffs  = 0
+  sum_diam_diffs = 0
+#   sum_opt_diff_over_diam = 0
+#   k.times do
+#     temp = test_random_orders
+#     worst = temp if worst.first < temp.first
+#     sum_opt_diffs  += temp.first
+#     sum_diam_diffs += temp[1]
+#     sum_opt_diff_over_diam += temp[2]
+#   end
+#   print "Opt diff ratio:  ", sum_opt_diffs.to_f / k, "\n"
+#   print "Diameter ratio:  ", sum_diam_diffs.to_f / k, "\n"
+#   print "Opt diff / diam: ", sum_opt_diff_over_diam.to_f / k, "\n"
+#   print worst.first, "\n", worst.last, "\n\n"
+  k.times do
+    temp = test_big_random_orders
+    sum_diam_diffs += temp
+  end
+  print "Diameter ratio:     ", sum_diam_diffs.to_f / k, "\n"
+
+#   f = File.open("hb1.txt", "a")
+#   10.times do
+#     hb =  heuristic_breaker(12)
+#     print hb, "\n\n"
+#     f.write(hb)
+#     f.write("\n\n")
+#   end
+#   
+#   f.close
 
 #   print heuristic_breaker(9)
 #   main
