@@ -6,6 +6,13 @@ class Array
   def mean
     self.sum.to_f / self.length
   end
+  
+  def delete_one(elt)
+    ret = Array.new(self)
+    index = ret.index(elt)
+    ret.delete_at(index)
+    ret
+  end
 
   def find_interval
     max = -1.0 / 0
@@ -30,7 +37,7 @@ class Array
   def find_successive_intervals
     intervals = []
     (1..self.length).each do |i|
-      intervals << [self.slice(0, i).find_interval, self.slice(0, i).mean]
+      intervals << [self.slice(0, i).find_interval, self.slice(0, i).mean] # could use Array#take instead of slice
     end
     intervals
   end
@@ -130,15 +137,8 @@ class Array
       end
     end
     closest
-  end
-  
-  def delete_one(elt)
-    ret = Array.new(self)
-    index = ret.index(elt)
-    ret.delete_at(index)
-    ret
-  end
-  
+  end  
+
   def find_apx_interval
     # Picks the x_i closest to the mean of the current unused elements
 
