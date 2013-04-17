@@ -153,6 +153,24 @@ class Array
     apx_interval
   end
 
+  def find_apx_random(k=100)
+    # Tests k random orderings, take the best
+    best_order = Array.new(self)
+    best_interval_length = self.interval_length
+    k.times do
+      shuffled = self.shuffle
+      shuffled_interval_length = shuffled.interval_length
+      if shuffled_interval_length < best_interval_length
+        best_order.clear
+        shuffled.each do |elt|
+          best_order << elt
+        end
+        best_interval_length = shuffled_interval_length
+      end
+    end
+    best_order
+  end
+
   def find_apx_interval2(m=nil)
     # Add the element closest to C_n
 
@@ -264,10 +282,10 @@ end
 # good or bad the above heuristics are
 #################################################
 
-def heuristic_breaker(n=6)
+def heuristic_breaker(n=8)
   worst_example = []
   interval = 0
-  10000.times do
+  100.times do
     an_opt = get_opt(n).first
 #     apx = an_opt.improved_heuristic
     apx = an_opt.sort.find_apx_interval4
@@ -345,8 +363,18 @@ def main
 end
 
 if __FILE__ == $0
-#   print heuristic_breaker(9)
-  main
+  r = rand_array(8, -1000, 1000)
+  apx = r.find_apx_random(1000)
+  opt = r.find_best_interval.first
+
+  print apx, "\n"
+  print opt, "\n"
+  print apx.interval_length.to_f / opt.interval_length, "\n"
+#  10.times do
+#    print heuristic_breaker(10), "\n"
+#  end
+
+#   main
 #   5.times do
 #     main
 #   end

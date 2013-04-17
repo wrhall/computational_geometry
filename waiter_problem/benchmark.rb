@@ -6,7 +6,7 @@ require "./center"
 
 a = (0..100).to_a
 
-b = rand_array(10, -100, 100)
+b = rand_array(8, -100, 100)
 c = rand_array(10, -100, 100)
 d = rand_array(11, -100, 100)
 e = rand_array(12, -100, 100)
