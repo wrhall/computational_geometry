@@ -6,6 +6,13 @@ class Array
   def mean
     self.sum.to_f / self.length
   end
+  
+  def delete_one(elt)
+    ret = Array.new(self)
+    index = ret.index(elt)
+    ret.delete_at(index)
+    ret
+  end
 
   def find_interval
     max = -1.0 / 0
@@ -19,7 +26,7 @@ class Array
       current = sum / (i + 1)
       if current < min
         min = current
-        end
+      end
       if current > max
         max = current
       end
@@ -30,7 +37,7 @@ class Array
   def find_successive_intervals
     intervals = []
     (1..self.length).each do |i|
-      intervals << [self.slice(0, i).find_interval, self.slice(0, i).mean]
+      intervals << [self.slice(0, i).find_interval, self.slice(0, i).mean] # could use Array#take instead of slice
     end
     intervals
   end
@@ -130,15 +137,8 @@ class Array
       end
     end
     closest
-  end
-  
-  def delete_one(elt)
-    ret = Array.new(self)
-    index = ret.index(elt)
-    ret.delete_at(index)
-    ret
-  end
-  
+  end  
+
   def find_apx_interval
     # Picks the x_i closest to the mean of the current unused elements
 
@@ -285,7 +285,7 @@ end
 def heuristic_breaker(n=8)
   worst_example = []
   interval = 0
-  100.times do
+  10.times do
     an_opt = get_opt(n).first
 #     apx = an_opt.improved_heuristic
     apx = an_opt.sort.find_apx_interval4
@@ -361,6 +361,55 @@ def main
   print_intervals(best.first);
   print "\n-------------------------------------------------\n\n"
 end
+
+def test_random_orders
+  a = rand_array(8, -1000, 1000)
+  zeroed = a.zero_mean
+  diameter = zeroed.max - zeroed.min
+  
+  opt_order  = zeroed.find_best_interval.first
+  opt_int = opt_order.find_interval
+  opt_diff = diff(opt_int)
+#   print "Opt ordering:     ", opt_order, "\n"
+#   print "Opt interval:     ", opt_diff, "\n"
+  
+  # Average badness
+  random_diffs = []
+  1000.times do
+    r = zeroed.shuffle
+    rand_int = r.find_interval
+    rand_diff = diff(rand_int)
+    random_diffs << rand_diff
+  end
+#   print "Random diffs:     ", random_diffs.mean, "\n"
+#   print "Ratio rand / opt: ", random_diffs.mean.to_f / opt_diff, "\n"
+  return [random_diffs.mean.to_f / opt_diff, random_diffs.mean.to_f / diameter, opt_diff / diameter, opt_order]
+end
+
+def test_big_random_orders
+  a = rand_array(100, -1000, 1000)
+  zeroed = a.zero_mean
+  diameter = zeroed.max - zeroed.min
+  
+#   opt_order  = zeroed.find_best_interval.first
+#   opt_int = opt_order.find_interval
+#   opt_diff = diff(opt_int)
+#   print "Opt ordering:     ", opt_order, "\n"
+#   print "Opt interval:     ", opt_diff, "\n"
+  
+  # Average badness
+  random_diffs = []
+  1000.times do
+    r = zeroed.shuffle
+    rand_int = r.find_interval
+    rand_diff = diff(rand_int)
+    random_diffs << rand_diff
+  end
+#   print "Random diffs:     ", random_diffs.mean, "\n"
+#   print "Ratio rand / opt: ", random_diffs.mean.to_f / opt_diff, "\n"
+  random_diffs.mean.to_f / diameter
+end
+
 
 if __FILE__ == $0
   r = rand_array(8, -1000, 1000)
