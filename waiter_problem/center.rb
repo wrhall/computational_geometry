@@ -26,7 +26,7 @@ class Array
       current = sum / (i + 1)
       if current < min
         min = current
-        end
+      end
       if current > max
         max = current
       end
@@ -178,6 +178,24 @@ class Array
     apx_interval
   end
 
+  def find_apx_random(k=100)
+    # Tests k random orderings, take the best
+    best_order = Array.new(self)
+    best_interval_length = self.interval_length
+    k.times do
+      shuffled = self.shuffle
+      shuffled_interval_length = shuffled.interval_length
+      if shuffled_interval_length < best_interval_length
+        best_order.clear
+        shuffled.each do |elt|
+          best_order << elt
+        end
+        best_interval_length = shuffled_interval_length
+      end
+    end
+    best_order
+  end
+
   def find_apx_interval2(m=nil)
     # Add the element closest to C_n
 
@@ -289,7 +307,7 @@ end
 # good or bad the above heuristics are
 #################################################
 
-def heuristic_breaker(n=6)
+def heuristic_breaker(n=8)
   worst_example = []
   interval = 0
   10.times do
@@ -417,7 +435,6 @@ def test_big_random_orders
   random_diffs.mean.to_f / diameter
 end
 
-# def test_
 
 def test_swap
   k = 1000
@@ -452,79 +469,17 @@ def test_swap
 end
 
 if __FILE__ == $0
-  test_swap
+  r = rand_array(8, -1000, 1000)
+  apx = r.find_apx_random(1000)
+  opt = r.find_best_interval.first
 
-end
+  print apx, "\n"
+  print opt, "\n"
+  print apx.interval_length.to_f / opt.interval_length, "\n"
+#  10.times do
+#    print heuristic_breaker(10), "\n"
+#  end
 
-
-  # k = 200
-  # worst = 0
-  # worst_a = []
-  # sorted_int = 0
-  # rev_sorted_int = 0
-  # best_order = []
-  # best_int = 0
-  # k.times do
-  #   a = rand_array(8, -100, 100)
-  #   a_best = a.find_best_recursive.first
-  #   a_best_int = a_best.interval_length
-  #   r1 = a.sort.interval_length
-  #   r2 = a.sort.reverse.interval_length
-  #   if [r1, r2].min.to_f / a_best_int > worst
-  #     worst = [r1, r2].min.to_f / a_best_int
-  #     worst_a = a
-  #     best_order = a_best
-  #     best_int = a_best_int
-  #     sorted_int = r1
-  #     rev_sorted_int = r2
-  #     
-  #   end
-  # end
-  # puts "ratio:         ", worst,          "\n"
-  # print "sorted_order: ", worst_a.sort,   "\n"
-  # print "best_order:   ", best_order,     "\n"
-  # print "best_int:     ", best_int,       "\n"
-  # print "sorted_int:   ", sorted_int,     "\n"
-  # print "rsorted_int:  ", rev_sorted_int, "\n"
-# end
-  
-  
-  
-  
-  
-  
-#   worst = [0]
-#   sum_opt_diffs  = 0
-#  sum_diam_diffs = 0
-#   sum_opt_diff_over_diam = 0
-#   k.times do
-#     temp = test_random_orders
-#     worst = temp if worst.first < temp.first
-#     sum_opt_diffs  += temp.first
-#     sum_diam_diffs += temp[1]
-#     sum_opt_diff_over_diam += temp[2]
-#   end
-#   print "Opt diff ratio:  ", sum_opt_diffs.to_f / k, "\n"
-#   print "Diameter ratio:  ", sum_diam_diffs.to_f / k, "\n"
-#   print "Opt diff / diam: ", sum_opt_diff_over_diam.to_f / k, "\n"
-#   print worst.first, "\n", worst.last, "\n\n"
-  # k.times do
-  #   temp = test_big_random_orders
-  #   sum_diam_diffs += temp
-  # end
-  # print "Diameter ratio:     ", sum_diam_diffs.to_f / k, "\n"
-
-#   f = File.open("hb1.txt", "a")
-#   10.times do
-#     hb =  heuristic_breaker(12)
-#     print hb, "\n\n"
-#     f.write(hb)
-#     f.write("\n\n")
-#   end
-#   
-#   f.close
-
-#   print heuristic_breaker(9)
 #   main
 #   5.times do
 #     main
