@@ -33,7 +33,11 @@ class Array
     end
     [min, max]
   end
-
+  
+  def interval_length
+    diff(self.find_interval)
+  end
+  
   def find_successive_intervals
     intervals = []
     (1..self.length).each do |i|
@@ -53,7 +57,7 @@ class Array
     self.find_best_recursive
   end
 
-  def find_best_fast
+  def find_best_iterative
     # Avgs: < 3 seconds per ary up to size 11
     apx_diff = lowest_apx_diff
     best = []
@@ -80,10 +84,6 @@ class Array
       big_ary.shift
     end
     best
-  end
-  
-  def interval_length
-    diff(self.find_interval)
   end
 
   def find_best_recursive
@@ -125,6 +125,31 @@ class Array
           best << temp_order
         end
       end
+    end
+  end
+
+  def swap_pass
+    self.to_enum.with_index.each do |elt, index|
+      best_swap_index = index
+      best_interval_length = self.interval_length
+      self.to_enum.with_index.each do |swapper, swapdex|
+        # Test the array out with the current element ``elt`` and ``swapper`` switched
+        self[index] = swapper
+        self[swapdex] = elt
+        interval_length = self.interval_length
+
+        if interval_length < best_interval_length
+          best_interval_length = interval_length
+          best_swap_index = swapdex
+        end
+
+        # change the array back to how it originally was
+        self[index] = elt
+        self[swapdex] = swapper
+      end
+      # Having tested every element, we know where to place ``elt`` to minimize the interval
+      self[index] = self[best_swap_index]
+      self[best_swap_index] = elt
     end
   end
 
@@ -394,11 +419,83 @@ end
 
 # def test_
 
+def test_swap
+  k = 1000
+  puts k
+  already_opt = 0
+  swaps_to_opt = 0
+  swaps_better = 0 # improves but not opt
+  no_change = 0 # no change and not already opt
+  k.times do
+    a = rand_array(10, 0, 1000)
+    za = a.zero_mean
+    best = za.find_best_interval.first
+    apx  = za.find_apx_interval4
+    initial_apx = apx.interval_length
+    improved_apx = apx.swap_pass.interval_length
+    opt_interval = best.interval_length
+    if opt_interval == initial_apx
+      already_opt += 1
+    elsif improved_apx == initial_apx
+      no_change += 1
+    elsif improved_apx == opt_interval
+      swaps_to_opt += 1
+    else
+      swaps_better += 1
+    end
+  end
+  print "Apx is already opt:           ", already_opt.to_f / k, "\n"
+  print "Swaps to optimal:             ", swaps_to_opt.to_f / k, "\n"
+  print "Swap improves, but isn't opt: ", swaps_better.to_f / k, "\n"
+  print "Swap does not improve apx:    ", no_change.to_f / k, "\n"
+
+end
+
 if __FILE__ == $0
-  k = 500
+  test_swap
+
+end
+
+
+  # k = 200
+  # worst = 0
+  # worst_a = []
+  # sorted_int = 0
+  # rev_sorted_int = 0
+  # best_order = []
+  # best_int = 0
+  # k.times do
+  #   a = rand_array(8, -100, 100)
+  #   a_best = a.find_best_recursive.first
+  #   a_best_int = a_best.interval_length
+  #   r1 = a.sort.interval_length
+  #   r2 = a.sort.reverse.interval_length
+  #   if [r1, r2].min.to_f / a_best_int > worst
+  #     worst = [r1, r2].min.to_f / a_best_int
+  #     worst_a = a
+  #     best_order = a_best
+  #     best_int = a_best_int
+  #     sorted_int = r1
+  #     rev_sorted_int = r2
+  #     
+  #   end
+  # end
+  # puts "ratio:         ", worst,          "\n"
+  # print "sorted_order: ", worst_a.sort,   "\n"
+  # print "best_order:   ", best_order,     "\n"
+  # print "best_int:     ", best_int,       "\n"
+  # print "sorted_int:   ", sorted_int,     "\n"
+  # print "rsorted_int:  ", rev_sorted_int, "\n"
+# end
+  
+  
+  
+  
+  
+  
 #   worst = [0]
 #   sum_opt_diffs  = 0
-  sum_diam_diffs = 0
+#  sum_diam_diffs = 0
 #   sum_opt_diff_over_diam = 0
 #   k.times do
 #     temp = test_random_orders
@@ -411,11 +508,11 @@ if __FILE__ == $0
 #   print "Diameter ratio:  ", sum_diam_diffs.to_f / k, "\n"
 #   print "Opt diff / diam: ", sum_opt_diff_over_diam.to_f / k, "\n"
 #   print worst.first, "\n", worst.last, "\n\n"
-  k.times do
-    temp = test_big_random_orders
-    sum_diam_diffs += temp
-  end
-  print "Diameter ratio:     ", sum_diam_diffs.to_f / k, "\n"
+  # k.times do
+  #   temp = test_big_random_orders
+  #   sum_diam_diffs += temp
+  # end
+  # print "Diameter ratio:     ", sum_diam_diffs.to_f / k, "\n"
 
 #   f = File.open("hb1.txt", "a")
 #   10.times do
@@ -441,4 +538,3 @@ if __FILE__ == $0
 #     zz = get_opt
 #     pretty_print(zz)
 #   end
-end

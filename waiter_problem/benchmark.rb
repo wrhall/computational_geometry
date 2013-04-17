@@ -12,7 +12,7 @@ d = rand_array(11, -100, 100)
 e = rand_array(12, -100, 100)
 
 Benchmark.bm(7) do |x|
-  x.report("recursive:")  { 10.times { b.find_best_recursive } }
+  x.report("recursive:")  { 1.times { b.find_best_recursive } }
   # x.report("iterative:")  { 1.times { b.find_best_fast } }
 end
 # tries = 100
