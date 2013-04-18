@@ -344,13 +344,14 @@ def is_2k_apx
   end
 end
 
-def pretty_print(aa)
-  
-  print aa, "\n"
+def pretty_print(result_from_opt)
+  aa = result_from_opt
   unless aa.nil?
-    print "Sorted:   ", aa.first.sort, "\n"
-    print "Interval: ", aa.first.find_interval, "\n"
-    print "Mean:     ", aa.first.mean, "\n"
+    print "Sorted:     ", aa.first.sort, "\n"
+    print "Opt:        ", aa.first, "\n"
+    print "Interval:   ", aa.first.find_interval, "\n"
+    print "Int length: ", aa.first.interval_length, "\n"
+    print "Mean:       ", aa.first.mean, "\n"
     print "----------------------------------\n\n"
   end
 end
@@ -468,14 +469,35 @@ def test_swap
 
 end
 
-if __FILE__ == $0
-  r = rand_array(8, -1000, 1000)
-  apx = r.find_apx_random(1000)
-  opt = r.find_best_interval.first
+def test_ub
+  n = 12
+  i = 0
+  catch(:done) do
+    loop do
+      i += 1
+      puts i # if i % 10 == 0
+      a = rand_array(n, -1000, 1000)
+      # a = a.zero_mean
+      aa = a.find_best_interval
+      aa_int_length = aa.first.interval_length
+      a.each do |elt|
+        if (elt.abs / (Math.log(n, 2)**2)) > aa_int_length
+          print a, "\n"
+          print elt, "\n"
+          print elt.abs / (Math.log(n, 2)**2), "\n"
+          print aa_int_length, "\n\n"
+          pretty_print(aa)
+          throw :done
+        end
+      end
+    end
+  end
+end
 
-  print apx, "\n"
-  print opt, "\n"
-  print apx.interval_length.to_f / opt.interval_length, "\n"
+if __FILE__ == $0
+  test_ub
+
+end
 #  10.times do
 #    print heuristic_breaker(10), "\n"
 #  end
