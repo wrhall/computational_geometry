@@ -1,6 +1,36 @@
 # This is a file for some old tests that we made but are done using.
 
 
+## Test a weird issue in CVS vs WP
+def test_centered_order
+  a = rand_array(7, 0, 100)
+  b = a.zero_mean
+  d = {}
+  b.each_index do |i|
+    d[b[i]] = a[i]
+  end
+
+  aa = a.find_cvs_recursive
+  bb = b.find_cvs_recursive
+
+  abb = bb.map { |e| d[e] }
+  if abb.cvs_interval_length != aa.cvs_interval_length
+    print abb.cvs_interval_length, " : ", abb, "\n", aa.cvs_interval_length, " : ", aa, "\n", bb.cvs_interval_length, " : ", bb, "\n"
+  end
+end
+
+def test_max_xi_over_i
+  a = rand_array(7, -100, 100)
+  a = a.make_sum_zero
+
+  apx_ordering = a.find_apx_interval4
+  r = find_max_ratio(apx_ordering)
+  # opt = a.find_best_recursive.first
+  if r < 0.5 * apx_ordering.interval_length
+    print apx_ordering, " : ", apx_ordering.interval_length, " : ", r, "\n"
+  end
+end
+
 
 def find_best_interval
   # brute force to find opt solutions

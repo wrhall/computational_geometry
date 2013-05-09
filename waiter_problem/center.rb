@@ -128,6 +128,102 @@ class Array
     end
   end
 
+  #########################################
+  # Brief area to work on the CVS solution
+  #########################################
+
+  def find_cvs_interval
+    max = -1.0 / 0
+    min = 1.0 / 0
+    current = 0
+
+    self.each do |elt|
+      current += elt
+      if current < min
+        min = current
+      end
+      if current > max
+        max = current
+      end
+    end
+    [min, max]
+  end
+
+  def cvs_interval_length
+    diff(self.find_cvs_interval)
+  end
+
+  def cvs_apx
+    # Try to make s_{i+1} as close to s_n (or the sum) as possible
+    # Known to be a 2-APX
+
+    s_n = self.sum
+    unused = Array.new(self)
+    apx_interval = []
+
+    while unused != []
+      sum = apx_interval.sum
+      candidate = unused.first
+      next_s_i = sum + candidate
+      unused.each do |elt|
+        test_s_i = sum + elt
+        if (test_s_i - s_n).abs < (next_s_i - s_n).abs
+          candidate = elt
+          next_s_i = test_s_i
+        end
+      end
+      apx_interval << candidate
+      unused = unused.delete_one(candidate)
+    end
+    apx_interval
+  end
+
+  def find_cvs_recursive
+    # The use of ``uniq`` is slightly less efficient than not using it (if no duplicates),
+    # but it dramatically improves the performance if there are duplicates.
+    apx_diff = self.cvs_apx.cvs_interval_length
+    best = []
+    big_ary = self.uniq.map { |e| [[e], self.delete_one(e)] }
+    big_ary.each do |elt|
+      Array.cvs_recurse_method(best, apx_diff, elt.first, elt.last)
+    end
+    best.first
+  end
+
+  def self.cvs_recurse_method(best, apx_diff, current_order, unused)
+    if current_order.cvs_interval_length <= apx_diff
+      if unused.length > 1
+        unused.uniq.each do |elt|
+          # Make ``best_diff`` the current interval size (if we have found a good ordering),
+          # or make it ``apx_diff`` found earlier.
+          best_diff = best.any? ? best.first.cvs_interval_length : apx_diff
+          Array.cvs_recurse_method(best,
+                                  apx_diff,
+                                  current_order + [elt],
+                                  unused.delete_one(elt))
+        end
+      elsif unused.length == 1
+        temp_order = current_order + unused
+        interval_length = temp_order.cvs_interval_length
+        if best.empty?
+          interval_length <= apx_diff and best << temp_order
+        elsif interval_length == best.first.cvs_interval_length
+          best << temp_order 
+        elsif interval_length < best.first.cvs_interval_length
+          # You have to be careful here, since you're playing with a reference.
+          # If you just say "best = [temp_order]", you'll make a local variable called ``best``,
+          # but you *want* to modify the array that ``best`` is currently pointing to.
+          best.clear
+          best << temp_order
+        end
+      end
+    end
+  end
+
+  ############################################
+  # End of CVS stuff
+  ############################################
+
   def swap_pass
     self.to_enum.with_index.each do |elt, index|
       best_swap_index = index
@@ -272,6 +368,11 @@ class Array
     # Returns an array with the same relative values and a sum of 0
     m = self.mean
     self.map { |e| e - m }
+  end
+
+  def make_sum_zero
+    s = self.sum
+    self << -1 * s
   end
 
 
@@ -494,9 +595,44 @@ def test_ub
   end
 end
 
-if __FILE__ == $0
-  test_ub
+def find_max_ratio(ordering)
+  sum = 0.0
+  max_ratio = 0
+  ordering.to_enum.with_index(1).each do |elt, i|
+    ratio = elt.abs.to_f / i
+    max_ratio = ratio if ratio > max_ratio
+  end
+  max_ratio
+end
 
+def test_optwp_vs_optcvs
+  a = rand_array(7, -100, 100)
+  a = a.make_sum_zero
+
+  a_cvs = a.find_cvs_recursive
+  a_wp  = a.find_best_recursive.first
+  apx_cvs = a.cvs_apx
+  apx_wp  = a.find_apx_interval4
+
+  cvs_len = a_cvs.cvs_interval_length
+  wp_len  = a_wp.interval_length
+  apx_cvs_len = apx_cvs.cvs_interval_length
+  apx_wp_len = apx_wp.interval_length
+
+  print "CVS: ", a_cvs, " - ", cvs_len, "    - %.3f" % (cvs_len.to_f / (a.length - 1)), "\n"
+  print "WP:  ", a_wp, " - %.3f" % wp_len, " - %.3f" % (wp_len)
+  print "  -- NOTICE!" if a_cvs.cvs_interval_length.to_f / (a.length - 1) > a_wp.interval_length
+  print "\nCPX: ", apx_cvs, " - ", apx_cvs_len, "   - %.3f" % (apx_cvs_len.to_f / (a.length - 1)), "\n"
+  print "WPX: ", apx_wp, " - %.3f" % apx_wp_len
+  print "\n\n"
+
+end
+
+
+
+if __FILE__ == $0
+  k = 100
+  k.times { test_optwp_vs_optcvs } 
 end
 #  10.times do
 #    print heuristic_breaker(10), "\n"
